@@ -1,5 +1,5 @@
 from pyspark.sql import SparkSession
-from pyspark.sql.functions import col
+from pyspark.sql.functions import col,from_json
 from pyspark.sql.types import *
 
 # Create a Spark session
@@ -20,8 +20,6 @@ def read_csv(path, options):
 df = read_csv("../../resource/delta_log.csv", options)
 df.show()
 
-from pyspark.sql.types import MapType, StringType, StructType, StructField
-from pyspark.sql.functions import from_json
 
 operation_parameters_schema = StructType([
     StructField("mode", StringType(), True),
