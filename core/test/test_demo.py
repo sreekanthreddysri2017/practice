@@ -32,7 +32,7 @@ class MyTestCase(unittest.TestCase):
 
 
         # Call the explode_df function with proper schemas
-        actual_df = explode_df(df,"id_period_end_date","id_scenario_version")
+        actual_df = explode_df(df,id_columns)
 
 
         # Limit the actual DataFrame to match the expected DataFrame
