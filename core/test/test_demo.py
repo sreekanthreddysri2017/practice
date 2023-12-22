@@ -1,36 +1,44 @@
 import unittest
-
 from core.util.main import *
-spark = SparkSession.builder.appName("CreateDataFrame").getOrCreate()
 
 class MyTestCase(unittest.TestCase):
 
-    def test_explode(self):
+    def test_explode_df(self):
+        # Create a Spark session
+        spark = SparkSession.builder.appName("CreateDataFrame").getOrCreate()
+
+        # Define the schema
         schema = StructType([
-            StructField("version", IntegerType(), nullable=True),
-            StructField("timestamp", TimestampType(), nullable=True),
+            StructField("version", StringType(), nullable=True),
+            StructField("timestamp", StringType(), nullable=True),
             StructField("numFiles", StringType(), nullable=True),
             StructField("id_period_end_date", StringType(), nullable=False),
             StructField("id_scenario_version", StringType(), nullable=False),
-            StructField("end_date_data_format", DateType(), nullable=True),
+
         ])
 
+        # Input Csv data
+        csv_path = "../../resource/delta_log.csv"  # Replace with your actual path
+        df = read_csv(csv_path, options = {'header': True, 'delimiter': ',', 'escape': '"'})
+
+        # Create the expected DataFrame
         data = [
-            (129, datetime(2023, 12, 15, 20, 3, 28), "1", "20231231", "0", datetime(2023, 12, 31)),
-            (128, datetime(2023, 12, 15, 20, 0, 28), "1", "20231231", "0", datetime(2023, 12, 31)),
-            (127, datetime(2023, 12, 15, 16, 42, 6), "3", "20231130", "0", datetime(2023, 11, 30)),
-            (127, datetime(2023, 12, 15, 16, 42, 6), "3", "20231031", "0", datetime(2023, 10, 31)),
+            (129, '2023-12-15T14:33:28.000+0000', "1", "20231231", "0"),
+            (128, '2023-12-15T14:30:28.000+0000', "1", "20231231", "0"),
+            (127, '2023-12-15T11:12:06.000+0000', "3", "20231130", "0"),
+            (127, '2023-12-15T11:12:06.000+0000', "3", "20231031", "0"),
         ]
-
-        # Create the DataFrame
         expected_df = spark.createDataFrame(data, schema=schema)
+        expected_df.printSchema()
 
-        actual_df = explode_df(df,operation_parameters_schema,operation_metrics_schema)
+        # Call the explode_df function with proper schemas
+        actual_df = explode_df(df)
+        actual_df.printSchema()
 
-        df_actual=actual_df.limit(4)
+        # Limit the actual DataFrame to match the expected DataFrame
+        df_actual = actual_df.limit(4)
 
-        self.assertEqual(df_actual.show(),expected_df.show())  # add assertion here
-
-
+        # Assert the DataFrames are equal
+        self.assertEqual(df_actual.collect(), expected_df.collect())  # add assertion here
 if __name__ == '__main__':
     unittest.main()
