@@ -1,9 +1,12 @@
 from pyspark.sql import SparkSession
 from pyspark.sql.functions import col,split, explode,regexp_extract
 from pyspark.sql.types import *
+from pyspark.sql import SparkSession
+from pyspark.sql.types import StructType, StructField, IntegerType, TimestampType, StringType, DateType
+from datetime import datetime
 
 from pyspark.sql.types import MapType, StringType, StructType, StructField
-from pyspark.sql.functions import from_json
+from pyspark.sql.functions import *
 
 operation_parameters_schema = StructType([
     StructField("mode", StringType(), True),
@@ -47,10 +50,19 @@ def explode_df(df,operation_parameters_schema,operation_metrics_schema):
        .withColumn("id_scenario_version", regexp_extract(explode_df["predicate"], "id_scenario_version='(\\d+)'", 1))
 
     final_df = final_df.drop("predicate")
+    # final_data_df = final_df.withColumn("end_date_data_format", to_date(final_df["id_period_end_date"], "yyyyMMdd"))
+
     return final_df
 
-df = read_csv("resource/delta_log.csv", options)
+
+
+df = read_csv("../../resource/delta_log.csv", options)
+
+# df.show()
 
 final_df = explode_df(df,operation_parameters_schema,operation_metrics_schema)
 
-final_df.show()
+# final_df.show()
+
+# df_j = from_json_df(df,operation_parameters_schema,operation_metrics_schema)
+# # df_j.show(truncate=False)
